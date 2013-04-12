@@ -1,0 +1,6 @@
+[submodule "libssl-cmake"]
+	path = libssl-cmake
+	url = https://github.com/changyy/libssl-cmake.git
+[submodule "libz-cmake"]
+	path = libz-cmake
+	url = https://github.com/changyy/libz-cmake.git
