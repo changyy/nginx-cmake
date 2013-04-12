@@ -11,7 +11,7 @@ $ make
 $ ./nginx-out/sbin/nginx -p ./nginx-out/
 </pre>
 
-CROSS Compile (Testing on ARM Device):
+Cross Compiler (Testing on ARM Device):
 <pre>
 $ git clone --recursive https://github.com/changyy/nginx-cmake.git
 $ cd nginx-cmake
@@ -28,3 +28,5 @@ $ make
 $ scp ./nginx-out root@192.168.168.168:/tmp
 $ ssh root@192.168.168.168 "/tmp/nginx-out/sbin/nginx -p /tmp/nginx-out/"
 </pre>
+
+Thanks for this sharing: [Ali's blog: Cross-compile nginx 1.3.6](http://r1729.blogspot.tw/2012/10/cross-compile-nginx-136.html) & [YangAcer](https://github.com/yangacer)'s help.
