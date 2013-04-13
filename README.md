@@ -27,7 +27,7 @@ $ cmake .. -DCMAKE_TOOLCHAIN_FILE=/path/toolchain-arm6.cmake -DREMOTE_DEVICE_SSH
 $ make
 $ scp -r ./nginx-out root@192.168.168.168:/tmp
 $ ssh root@192.168.168.168 "/tmp/nginx-out/sbin/nginx -p /tmp/nginx-out/"
-(need to check the shared library used by sbin/ngix: readelf -a sbin/nginx | grep Shared)
+(need to check the shared library used by sbin/nginx: readelf -a sbin/nginx | grep Shared)
 </pre>
 
 Thanks for this sharing: [Ali's blog: Cross-compile nginx 1.3.6](http://r1729.blogspot.tw/2012/10/cross-compile-nginx-136.html) & [YangAcer](https://github.com/yangacer)'s help.
