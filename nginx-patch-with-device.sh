@@ -6,7 +6,7 @@ sed -i 's/ngx_size=`$NGX_AUTOTEST`/ngx_size=`auto\/nginx-remote-check.sh $NGX_AU
 sed -i 's/uname -r/auto\/nginx-remote-check.sh uname -r/g' $1/auto/os/linux
 sed -i 's/distclean/distclean 2>\/dev\/null 1>\/dev\/null/g' $1/auto/lib/pcre/make
 if [ ! -z $2 ] ; then
-	sed -i "s/--disable-shared /--disable-shared --host=\"$2\" /g" $1/auto/lib/pcre/make
+	sed -i "s/--disable-shared /--disable-shared --enable-utf8 --host=\"$2\" /g" $1/auto/lib/pcre/make
 fi
 if [ ! -z $3 ] ; then
 	ssh-keygen -t rsa -f $1/auto/remote-ssh-key -N ""

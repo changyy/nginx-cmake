@@ -16,9 +16,14 @@ if (DEFINED CMAKE_TOOLCHAIN_FILE)
 endif(DEFINED CMAKE_TOOLCHAIN_FILE)
 
 set(SELF_DEPENDS "")
-add_subdirectory(libz-cmake)
+if(NOT TARGET build_libz)
+	add_subdirectory(libz-cmake)
+endif(NOT TARGET build_libz)
 set(SELF_DEPENDS "${SELF_DEPENDS};build_libz")
-add_subdirectory(libssl-cmake)
+
+if(NOT TARGET build_libssl)
+	add_subdirectory(libssl-cmake)
+endif(NOT TARGET build_libssl)
 set(SELF_DEPENDS "${SELF_DEPENDS};build_libssl")
 
 set(TOOL_NGINX_SOURCE nginx-1.2.8.tar.gz)
@@ -26,17 +31,26 @@ set(TOOL_NGINX_DIR nginx-1.2.8)
 set(SELF_PRECONFIG_OPTIONS "")
 #set(CONFIG_ADD_OPTIONS "--prefix=${CMAKE_BINARY_DIR}/nginx-out;--with-pcre=${CMAKE_BINARY_DIR}/pcre-8.32;--with-zlib=${CMAKE_BINARY_DIR}/zlib-1.2.7;--with-openssl=${CMAKE_BINARY_DIR}/openssl-1.0.1e;--with-sha1=${CMAKE_BINARY_DIR}/include/openssl;")
 set(CONFIG_ADD_OPTIONS "--prefix=${CMAKE_BINARY_DIR}/nginx-out;--with-pcre=${CMAKE_BINARY_DIR}/pcre-8.32;--with-zlib=${CMAKE_BINARY_DIR}/zlib-1.2.7;--with-openssl=${CMAKE_BINARY_DIR}/openssl-1.0.1e;--with-sha1=${CMAKE_BINARY_DIR}/sha;")
+set(CONFIG_ADD_OPTIONS "--prefix=${CMAKE_BINARY_DIR}/nginx-out;--with-pcre=${CMAKE_BINARY_DIR}/pcre-8.32;--with-zlib=${CMAKE_BINARY_DIR}/zlib-1.2.7")
+	if(NOT DEFINED ENABLE_HTTPS)
+		message( "[nginx] https is disable (remove -DENABLE_HTTPS=${ENABLE_HTTPS} to switch off)" )
+	else(NOT DEFINED ENABLE_HTTPS)
+		message( "[nginx] https is enable (add -DENABLE_HTTPS=${ENABLE_HTTPS} to switch on)" )
+		set(CONFIG_ADD_OPTIONS "${CONFIG_ADD_OPTIONS};--with-http_ssl_module")
+	endif(NOT DEFINED ENABLE_HTTPS)
+
+
 	if(DEFINED CMAKE_TOOLCHAIN_FILE)
 		add_custom_command(
 			OUTPUT BUILD_NGINX
-			COMMAND wget -qO- http://downloads.sourceforge.net/project/pcre/pcre/8.32/pcre-8.32.tar.bz2 | tar -xjvf - && tar -xzvf ${CMAKE_CURRENT_SOURCE_DIR}/libsha-0.8.2b.tar.gz && wget -qO- http://nginx.org/download/nginx-1.2.8.tar.gz | tar -xzvf - && cd ${CMAKE_BINARY_DIR}/${TOOL_NGINX_DIR} && cp ${CMAKE_CURRENT_SOURCE_DIR}/nginx-remote-check.sh auto/ && sh ${CMAKE_CURRENT_SOURCE_DIR}/nginx-patch-with-device.sh . ${target_platform} ${REMOTE_DEVICE_SSH_LOGIN} && time ${target_platform_preconfigure_options} ${SELF_PRECONFIG_OPTIONS} ./configure ${CONFIG_ADD_OPTIONS} && make -j2 && make install
+			COMMAND wget -qO- http://downloads.sourceforge.net/project/pcre/pcre/8.32/pcre-8.32.tar.bz2 | tar -xjvf - && tar -xzvf ${CMAKE_CURRENT_SOURCE_DIR}/libsha-0.8.2b.tar.gz && wget -qO- http://nginx.org/download/nginx-1.2.8.tar.gz | tar -xzvf - && cd ${CMAKE_BINARY_DIR}/${TOOL_NGINX_DIR} && cp ${CMAKE_CURRENT_SOURCE_DIR}/nginx-remote-check.sh auto/ && sh ${CMAKE_CURRENT_SOURCE_DIR}/nginx-patch-with-device.sh . ${target_platform} ${REMOTE_DEVICE_SSH_LOGIN} && time ${target_platform_preconfigure_options} ${SELF_PRECONFIG_OPTIONS} ./configure ${CONFIG_ADD_OPTIONS} --with-cc-opt="-I${CMAKE_BINARY_DIR}/include" --with-ld-opt="-L${CMAKE_BINARY_DIR}/lib" && make && make install
 			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 			COMMENT "Build nginx"
 		)
 	else(DEFINED CMAKE_TOOLCHAIN_FILE)
 		add_custom_command(
 			OUTPUT BUILD_NGINX
-			COMMAND wget -qO- http://downloads.sourceforge.net/project/pcre/pcre/8.32/pcre-8.32.tar.bz2 | tar -xjvf - && tar -xzvf ${CMAKE_CURRENT_SOURCE_DIR}/libsha-0.8.2b.tar.gz && wget -qO- http://nginx.org/download/nginx-1.2.8.tar.gz | tar -xzvf - && cd ${CMAKE_BINARY_DIR}/${TOOL_NGINX_DIR} && ./configure ${CONFIG_ADD_OPTIONS} && make -j2 && make install
+			COMMAND wget -qO- http://downloads.sourceforge.net/project/pcre/pcre/8.32/pcre-8.32.tar.bz2 | tar -xjvf - && tar -xzvf ${CMAKE_CURRENT_SOURCE_DIR}/libsha-0.8.2b.tar.gz && wget -qO- http://nginx.org/download/nginx-1.2.8.tar.gz | tar -xzvf - && cd ${CMAKE_BINARY_DIR}/${TOOL_NGINX_DIR} && ./configure ${CONFIG_ADD_OPTIONS} --with-cc-opt="-I${CMAKE_BINARY_DIR}/include" --with-ld-opt="-L${CMAKE_BINARY_DIR}/lib" && make && make install
 			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 			COMMENT "Build nginx" 
 		)
