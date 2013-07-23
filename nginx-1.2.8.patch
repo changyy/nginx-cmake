@@ -1,0 +1,13 @@
+diff -Naur nginx-1.2.8/src/core/ngx_file.c nginx-1.2.8-modified/src/core/ngx_file.c
+--- nginx-1.2.8/src/core/ngx_file.c	2013-02-10 11:55:18.000000000 +0800
++++ nginx-1.2.8-modified/src/core/ngx_file.c	2013-07-23 13:24:05.286090146 +0800
+@@ -509,7 +509,8 @@
+                 ngx_log_error(NGX_LOG_EMERG, cycle->log, ngx_errno,
+                               "chown(\"%s\", %d) failed",
+                               path[i]->name.data, user);
+-                return NGX_ERROR;
++                if( 0 != user ) // root
++                    return NGX_ERROR;
+             }
+         }
+ 

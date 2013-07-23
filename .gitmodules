@@ -4,3 +4,12 @@
 [submodule "libz-cmake"]
 	path = libz-cmake
 	url = https://github.com/changyy/libz-cmake.git
+[submodule "liblua-cmake"]
+	path = liblua-cmake
+	url = https://github.com/changyy/liblua-cmake.git
+[submodule "modules/mod_zip"]
+	path = modules/mod_zip
+	url = https://github.com/changyy/mod_zip.git
+[submodule "modules/lua-nginx-module"]
+	path = modules/lua-nginx-module
+	url = https://github.com/changyy/lua-nginx-module.git

@@ -26,13 +26,29 @@ if(NOT TARGET build_libssl)
 endif(NOT TARGET build_libssl)
 set(SELF_DEPENDS "${SELF_DEPENDS};build_libssl")
 
-#set(TOOL_NGINX_SOURCE nginx-1.2.8.tar.gz)
-#set(TOOL_NGINX_DIR nginx-1.2.8)
-set(TOOL_NGINX_SOURCE nginx-1.4.1.tar.gz)
-set(TOOL_NGINX_DIR nginx-1.4.1)
+if(NOT TARGET build_liblua)
+	add_subdirectory(liblua-cmake)
+endif(NOT TARGET build_liblua)
+set(SELF_DEPENDS "${SELF_DEPENDS};build_liblua")
+
+set(TOOL_TARGET_NAME "build_nginx")
+set(TOOL_TARGET_BUILD_OUTPUT "BUILD_NGINX")
+set(TOOL_TARGET_COMMENT "build nginx")
+set(TOOL_TARGET_SOURCE nginx-1.2.8.tar.gz)
+set(TOOL_TARGET_DIR nginx-1.2.8)
+#set(TOOL_TARGET_SOURCE nginx-1.4.1.tar.gz)
+#set(TOOL_TARGET_DIR nginx-1.4.1)
+set(TOOL_TARGET_PATCH ${TOOL_TARGET_DIR}.patch)
+set(TOOL_TARGET_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
+
 set(SELF_PRECONFIG_OPTIONS "")
-#set(CONFIG_ADD_OPTIONS "--prefix=${CMAKE_BINARY_DIR}/nginx-out;--with-pcre=${CMAKE_BINARY_DIR}/pcre-8.32;--with-zlib=${CMAKE_BINARY_DIR}/libz-cmake/zlib-1.2.8;--with-sha1=${CMAKE_BINARY_DIR}/sha;")
-set(CONFIG_ADD_OPTIONS "--prefix=${CMAKE_BINARY_DIR}/nginx-out;--with-pcre=${CMAKE_BINARY_DIR}/pcre-8.32;--with-sha1=${CMAKE_BINARY_DIR}/sha;")
+set(CONFIG_ADD_OPTIONS "--prefix=${TOOL_TARGET_INSTALL_PREFIX}/nginx-out;--with-pcre=${TOOL_TARGET_INSTALL_PREFIX}/pcre-8.32;--with-sha1=${TOOL_TARGET_INSTALL_PREFIX}/sha;")
+
+# nginx modules lua-nginx-module
+set(CONFIG_ADD_OPTIONS "${CONFIG_ADD_OPTIONS};--add-module=${CMAKE_CURRENT_SOURCE_DIR}/modules/lua-nginx-module")
+set(CONFIG_ADD_OPTIONS "${CONFIG_ADD_OPTIONS};--add-module=${CMAKE_CURRENT_SOURCE_DIR}/modules/mod_zip")
+#set(CONFIG_ADD_OPTIONS "${CONFIG_ADD_OPTIONS};--add-module=${CMAKE_CURRENT_SOURCE_DIR}/modules/nginx-upload-module")
+
 	if(NOT DEFINED ENABLE_HTTPS)
 		message( "[nginx] https is disable (add -DENABLE_HTTPS:bool=on to switch on)" )
 	else(NOT DEFINED ENABLE_HTTPS)
@@ -43,35 +59,39 @@ set(CONFIG_ADD_OPTIONS "--prefix=${CMAKE_BINARY_DIR}/nginx-out;--with-pcre=${CMA
 
 	if(DEFINED CMAKE_TOOLCHAIN_FILE)
 		add_custom_command(
-			OUTPUT BUILD_NGINX
+			OUTPUT ${TOOL_TARGET_BUILD_OUTPUT}
 			# libpcre
 			COMMAND test -e ${CMAKE_CURRENT_SOURCE_DIR}/pcre-8.32.tar.bz2 || wget http://downloads.sourceforge.net/project/pcre/pcre/8.32/pcre-8.32.tar.bz2 -O ${CMAKE_CURRENT_SOURCE_DIR}/pcre-8.32.tar.bz2
 			COMMAND tar -xjvf ${CMAKE_CURRENT_SOURCE_DIR}/pcre-8.32.tar.bz2
 			# libsha
 			COMMAND tar -xzvf ${CMAKE_CURRENT_SOURCE_DIR}/libsha-0.8.2b.tar.gz
 			# nginx source
-			COMMAND test -e ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_NGINX_SOURCE} || wget http://nginx.org/download/${TOOL_NGINX_SOURCE} -O ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_NGINX_SOURCE}
-			COMMAND tar -xzvf ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_NGINX_SOURCE}
+			COMMAND test -e ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_TARGET_SOURCE} || wget http://nginx.org/download/${TOOL_TARGET_SOURCE} -O ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_TARGET_SOURCE}
+			COMMAND tar -xzvf ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_TARGET_SOURCE}
+			# patch
+			COMMAND test -e ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_TARGET_PATCH} && cd ${TOOL_TARGET_DIR} && patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_TARGET_PATCH} && echo "use patch file: ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_TARGET_PATCH}" && touch ${CMAKE_CURRENT_BINARY_DIR}/_build_with_patch || echo "no patch file"
 			# configure
-			COMMAND cd ${TOOL_NGINX_DIR} && cp ${CMAKE_CURRENT_SOURCE_DIR}/nginx-remote-check.sh auto/ && sh ${CMAKE_CURRENT_SOURCE_DIR}/nginx-patch-with-device.sh . ${target_platform} ${REMOTE_DEVICE_SSH_LOGIN} && time ${target_platform_preconfigure_options} ${SELF_PRECONFIG_OPTIONS} ./configure ${CONFIG_ADD_OPTIONS} --with-cc-opt="-I${CMAKE_BINARY_DIR}/include" --with-ld-opt="-L${CMAKE_BINARY_DIR}/lib" && make && make install
+			COMMAND cd ${TOOL_TARGET_DIR} && cp ${CMAKE_CURRENT_SOURCE_DIR}/nginx-remote-check.sh auto/ && sh ${CMAKE_CURRENT_SOURCE_DIR}/nginx-patch-with-device.sh . ${target_platform} ${REMOTE_DEVICE_SSH_LOGIN} && time ${target_platform_preconfigure_options} ${SELF_PRECONFIG_OPTIONS} ./configure ${CONFIG_ADD_OPTIONS} --with-cc-opt="-I${TOOL_TARGET_INSTALL_PREFIX}/include" --with-ld-opt="-L${TOOL_TARGET_INSTALL_PREFIX}/lib" && make && make install
 			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 			COMMENT "Build nginx"
 		)
 	else(DEFINED CMAKE_TOOLCHAIN_FILE)
 		add_custom_command(
-			OUTPUT BUILD_NGINX
+			OUTPUT ${TOOL_TARGET_BUILD_OUTPUT}
 			# libpcre
 			COMMAND test -e ${CMAKE_CURRENT_SOURCE_DIR}/pcre-8.32.tar.bz2 || wget http://downloads.sourceforge.net/project/pcre/pcre/8.32/pcre-8.32.tar.bz2 -O ${CMAKE_CURRENT_SOURCE_DIR}/pcre-8.32.tar.bz2
 			COMMAND tar -xjvf ${CMAKE_CURRENT_SOURCE_DIR}/pcre-8.32.tar.bz2
 			# libsha
 			COMMAND tar -xzvf ${CMAKE_CURRENT_SOURCE_DIR}/libsha-0.8.2b.tar.gz
 			# nginx source
-			COMMAND test -e ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_NGINX_SOURCE} || wget http://nginx.org/download/${TOOL_NGINX_SOURCE} -O ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_NGINX_SOURCE}
-			COMMAND tar -xzvf ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_NGINX_SOURCE}
+			COMMAND test -e ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_TARGET_SOURCE} || wget http://nginx.org/download/${TOOL_TARGET_SOURCE} -O ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_TARGET_SOURCE}
+			COMMAND tar -xzvf ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_TARGET_SOURCE}
+			# patch
+			COMMAND test -e ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_TARGET_PATCH} && cd ${TOOL_TARGET_DIR} && patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_TARGET_PATCH} && echo "use patch file: ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_TARGET_PATCH}" && touch ${CMAKE_CURRENT_BINARY_DIR}/_build_with_patch || echo "no patch file"
 			# configure
-			COMMAND cd ${CMAKE_BINARY_DIR}/${TOOL_NGINX_DIR} && ./configure ${CONFIG_ADD_OPTIONS} --with-cc-opt="-I${CMAKE_BINARY_DIR}/include" --with-ld-opt="-L${CMAKE_BINARY_DIR}/lib" && make && make install
+			COMMAND cd ${TOOL_TARGET_INSTALL_PREFIX}/${TOOL_TARGET_DIR} && ./configure ${CONFIG_ADD_OPTIONS} --with-cc-opt="-I${TOOL_TARGET_INSTALL_PREFIX}/include" --with-ld-opt="-L${TOOL_TARGET_INSTALL_PREFIX}/lib" && make && make install
 			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 			COMMENT "Build nginx" 
 		)
 	endif(DEFINED CMAKE_TOOLCHAIN_FILE)
-	add_custom_target(build_nginx ALL DEPENDS ${SELF_DEPENDS} BUILD_NGINX )
+	add_custom_target(build_nginx ALL DEPENDS ${SELF_DEPENDS} ${TOOL_TARGET_BUILD_OUTPUT} )
