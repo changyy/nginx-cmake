@@ -47,7 +47,7 @@ set(CONFIG_ADD_OPTIONS "--prefix=${TOOL_TARGET_INSTALL_PREFIX}/nginx-out;--with-
 # nginx modules
 set(CONFIG_ADD_OPTIONS "${CONFIG_ADD_OPTIONS};--add-module=${CMAKE_CURRENT_SOURCE_DIR}/modules/lua-nginx-module")
 set(CONFIG_ADD_OPTIONS "${CONFIG_ADD_OPTIONS};--add-module=${CMAKE_CURRENT_SOURCE_DIR}/modules/mod_zip")
-#set(CONFIG_ADD_OPTIONS "${CONFIG_ADD_OPTIONS};--add-module=${CMAKE_CURRENT_SOURCE_DIR}/modules/nginx-upload-module")
+set(CONFIG_ADD_OPTIONS "${CONFIG_ADD_OPTIONS};--add-module=${CMAKE_CURRENT_SOURCE_DIR}/modules/nginx-upload-module")
 
 	if(NOT DEFINED ENABLE_HTTPS)
 		message( "[nginx] https is disable (add -DENABLE_HTTPS:bool=on to switch on)" )
