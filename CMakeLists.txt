@@ -42,9 +42,9 @@ set(TOOL_TARGET_PATCH ${TOOL_TARGET_DIR}.patch)
 set(TOOL_TARGET_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
 
 set(SELF_PRECONFIG_OPTIONS "")
-set(CONFIG_ADD_OPTIONS "--prefix=${TOOL_TARGET_INSTALL_PREFIX}/nginx-out;--with-pcre=${TOOL_TARGET_INSTALL_PREFIX}/pcre-8.32;--with-sha1=${TOOL_TARGET_INSTALL_PREFIX}/sha;")
+set(CONFIG_ADD_OPTIONS "--prefix=${TOOL_TARGET_INSTALL_PREFIX}/nginx-out;--with-pcre=${TOOL_TARGET_INSTALL_PREFIX}/pcre-8.32;--with-sha1=${TOOL_TARGET_INSTALL_PREFIX}/sha;--with-zlib=${TOOL_TARGET_INSTALL_PREFIX}/libz-cmake/zlib-1.2.8")
 
-# nginx modules lua-nginx-module
+# nginx modules
 set(CONFIG_ADD_OPTIONS "${CONFIG_ADD_OPTIONS};--add-module=${CMAKE_CURRENT_SOURCE_DIR}/modules/lua-nginx-module")
 set(CONFIG_ADD_OPTIONS "${CONFIG_ADD_OPTIONS};--add-module=${CMAKE_CURRENT_SOURCE_DIR}/modules/mod_zip")
 #set(CONFIG_ADD_OPTIONS "${CONFIG_ADD_OPTIONS};--add-module=${CMAKE_CURRENT_SOURCE_DIR}/modules/nginx-upload-module")
@@ -89,7 +89,7 @@ set(CONFIG_ADD_OPTIONS "${CONFIG_ADD_OPTIONS};--add-module=${CMAKE_CURRENT_SOURC
 			# patch
 			COMMAND test -e ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_TARGET_PATCH} && cd ${TOOL_TARGET_DIR} && patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_TARGET_PATCH} && echo "use patch file: ${CMAKE_CURRENT_SOURCE_DIR}/${TOOL_TARGET_PATCH}" && touch ${CMAKE_CURRENT_BINARY_DIR}/_build_with_patch || echo "no patch file"
 			# configure
-			COMMAND cd ${TOOL_TARGET_INSTALL_PREFIX}/${TOOL_TARGET_DIR} && ./configure ${CONFIG_ADD_OPTIONS} --with-cc-opt="-I${TOOL_TARGET_INSTALL_PREFIX}/include" --with-ld-opt="-L${TOOL_TARGET_INSTALL_PREFIX}/lib" && make && make install
+			COMMAND cd ${TOOL_TARGET_INSTALL_PREFIX}/${TOOL_TARGET_DIR} && ./configure ${CONFIG_ADD_OPTIONS} && make -j2 && make install
 			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 			COMMENT "Build nginx" 
 		)
