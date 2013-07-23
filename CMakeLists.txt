@@ -31,6 +31,13 @@ if(NOT TARGET build_liblua)
 endif(NOT TARGET build_liblua)
 set(SELF_DEPENDS "${SELF_DEPENDS};build_liblua")
 
+if(NOT TARGET build_NginxUploadModule)
+	add_subdirectory(nginx-upload-module)
+endif(NOT TARGET build_NginxUploadModule)
+set(SELF_DEPENDS "${SELF_DEPENDS};build_NginxUploadModule")
+
+
+
 set(TOOL_TARGET_NAME "build_nginx")
 set(TOOL_TARGET_BUILD_OUTPUT "BUILD_NGINX")
 set(TOOL_TARGET_COMMENT "build nginx")
